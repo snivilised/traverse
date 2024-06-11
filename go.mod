@@ -3,7 +3,7 @@ module github.com/snivilised/traverse
 go 1.22.0
 
 require (
-	github.com/onsi/ginkgo/v2 v2.18.0
+	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/snivilised/extendio v0.7.0
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
