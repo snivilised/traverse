@@ -1,7 +1,6 @@
 package tv
 
 import (
-	"github.com/snivilised/traverse/core"
 	"github.com/snivilised/traverse/internal/kernel"
 	"github.com/snivilised/traverse/internal/types"
 	"github.com/snivilised/traverse/measure"
@@ -10,7 +9,7 @@ import (
 
 type buildArtefacts struct {
 	o       *pref.Options
-	nav     core.Navigator
+	nav     types.KernelController
 	plugins []types.Plugin
 	ext     extent
 }
@@ -77,7 +76,7 @@ func (bs *Builders) buildAll() (*buildArtefacts, error) {
 		if bindErr := p.Init(); bindErr != nil {
 			return &buildArtefacts{
 				o:       o,
-				nav:     artefacts.Navigator,
+				nav:     artefacts.Controller,
 				plugins: plugins,
 				ext:     ext,
 			}, bindErr
@@ -86,7 +85,7 @@ func (bs *Builders) buildAll() (*buildArtefacts, error) {
 
 	return &buildArtefacts{
 		o:       o,
-		nav:     artefacts.Navigator,
+		nav:     artefacts.Controller,
 		plugins: plugins,
 		ext:     ext,
 	}, nil

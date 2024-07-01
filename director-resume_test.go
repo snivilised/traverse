@@ -88,7 +88,7 @@ var _ = Describe("Director(Resume)", Ordered, func() {
 	Context("features", func() {
 		Context("Run", func() {
 			When("filter", func() {
-				It("🧪 should: register ok", func(specCtx SpecContext) {
+				FIt("🧪 should: register ok", func(specCtx SpecContext) {
 					defer leaktest.Check(GinkgoT())()
 
 					ctx, cancel := context.WithCancel(specCtx)

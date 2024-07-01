@@ -19,9 +19,9 @@ func New(using *pref.Using, o *pref.Options,
 	controller := newController(using, o, impl, sealer, res)
 
 	return &Artefacts{
-		Navigator: controller,
-		Mediator:  controller.mediator,
-		Resources: res,
+		Controller: controller,
+		Mediator:   controller.Mediator,
+		Resources:  res,
 	}
 }
 
@@ -32,7 +32,7 @@ func newController(using *pref.Using,
 	res *types.Resources,
 ) *NavigationController {
 	return &NavigationController{
-		mediator: newMediator(using, o, impl, sealer, res),
+		Mediator: newMediator(using, o, impl, sealer, res),
 	}
 }
 

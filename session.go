@@ -8,13 +8,6 @@ import (
 	"github.com/snivilised/traverse/internal/types"
 )
 
-// Session represents a traversal session and keeps tracks of
-// timing.
-type Session interface {
-	StartedAt() time.Time
-	Elapsed() time.Duration
-}
-
 type session struct {
 	sync     synchroniser
 	started  time.Time
@@ -24,15 +17,34 @@ type session struct {
 
 func (s *session) start() {
 	s.started = time.Now()
+	s.sync.Starting(s)
 }
 
-func (s *session) finish(_ core.TraverseResult) {
+/*
+func (s *session) finish(result *TraverseResult, _ error) {
+	s.duration = time.Since(s.startAt)
+
+	if result != nil {
+		result.Session = s
+	}
+}
+*/
+
+func (s *session) finish(result core.TraverseResult) {
+	_ = result
+	// if result != nil {
+	// 	result.Session
+	// }
 	// I wonder if the traverse result should become available
 	// as a result of a message sent of the bus. Any component
 	// needing access to the result should handle the message. This
 	// way, we don't have to explicitly pass it around.
 	//
 	s.duration = time.Since(s.started)
+}
+
+func (s *session) IsComplete() bool {
+	return s.sync.IsComplete()
 }
 
 func (s *session) StartedAt() time.Time {

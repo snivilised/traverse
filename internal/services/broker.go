@@ -6,10 +6,10 @@ const (
 	format                  = "%03d"
 	TopicInitPlugins        = "topic:init.plugins"
 	TopicInterceptNavigator = "topic:intercept.navigator"
+	TopicNavigationComplete = "topic:navigation.complete"
 	TopicOptionsAnnounce    = "topic:options.announce"
 	TopicOptionsBefore      = "topic:options.before"
 	TopicOptionsComplete    = "topic:options.complete"
-	TopicTraverseResult     = "topic:traverse.result"
 )
 
 var (
@@ -17,10 +17,10 @@ var (
 	topics = []string{
 		TopicInitPlugins,
 		TopicInterceptNavigator,
+		TopicNavigationComplete,
 		TopicOptionsAnnounce,
 		TopicOptionsBefore,
 		TopicOptionsComplete,
-		TopicTraverseResult,
 	}
 )
 

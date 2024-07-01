@@ -1,7 +1,8 @@
 package resume
 
 import (
-	"github.com/snivilised/traverse/core"
+	"context"
+
 	"github.com/snivilised/traverse/internal/kernel"
 	"github.com/snivilised/traverse/internal/types"
 	"github.com/snivilised/traverse/pref"
@@ -19,12 +20,13 @@ type resumeStrategy interface {
 	init()
 	attach()
 	detach()
-	resume() (*types.KernelResult, error)
+	resume(context.Context) (*types.KernelResult, error)
+	complete() bool
 	finish() error
 }
 
 type baseStrategy struct {
 	o    *pref.Options
-	nav  core.Navigator
+	kc   types.KernelController
 	impl kernel.NavigatorImpl
 }

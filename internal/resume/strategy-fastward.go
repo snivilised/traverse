@@ -1,6 +1,8 @@
 package resume
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"github.com/snivilised/traverse/enums"
 	"github.com/snivilised/traverse/internal/types"
@@ -38,8 +40,12 @@ func (s *fastwardStrategy) detach() {
 
 }
 
-func (s *fastwardStrategy) resume() (*types.KernelResult, error) {
+func (s *fastwardStrategy) resume(context.Context) (*types.KernelResult, error) {
 	return &types.KernelResult{}, nil
+}
+
+func (s *fastwardStrategy) complete() bool {
+	return true
 }
 
 func (s *fastwardStrategy) finish() error {

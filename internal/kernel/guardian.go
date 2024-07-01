@@ -16,17 +16,21 @@ type (
 	invocationIt    = collections.Iterator[types.Link]
 )
 
+type owned struct {
+	mums measure.Mutables
+}
+
 // anchor is a specialised link that should always be the
 // last in the chain and contains the original client's handler.
 type anchor struct {
 	target core.Client
-	mums   measure.Mutables
+	owned  owned
 }
 
 func (t *anchor) Next(node *core.Node) (bool, error) {
 	if metric := lo.Ternary(node.IsFolder(),
-		t.mums[enums.MetricNoFoldersInvoked],
-		t.mums[enums.MetricNoFilesInvoked],
+		t.owned.mums[enums.MetricNoFoldersInvoked],
+		t.owned.mums[enums.MetricNoFilesInvoked],
 	); metric != nil {
 		metric.Tick()
 	}
@@ -67,7 +71,9 @@ func newGuardian(callback core.Client,
 	stack := collections.NewStack[types.Link]()
 	stack.Push(&anchor{
 		target: callback,
-		mums:   mums,
+		owned: owned{
+			mums: mums,
+		},
 	})
 
 	return &guardian{

@@ -12,6 +12,8 @@ import (
 type (
 	// NavigatorImpl
 	NavigatorImpl interface {
+		Starting(session types.Session)
+
 		// Top
 		Top(ctx context.Context,
 			ns *navigationStatic,
@@ -24,6 +26,8 @@ type (
 			ns *navigationStatic,
 			current *core.Node,
 		) (bool, error)
+
+		Result(ctx context.Context, err error) *types.KernelResult
 	}
 
 	// NavigatorDriver

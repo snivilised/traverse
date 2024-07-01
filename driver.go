@@ -22,7 +22,7 @@ func (d *driver) init() {
 			_ = m.Data
 			// now invoke session.finish
 		},
-		Matcher: services.TopicTraverseResult,
+		Matcher: services.TopicNavigationComplete,
 	})
 }
 

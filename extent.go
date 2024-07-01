@@ -16,6 +16,7 @@ type extent interface {
 	options(...pref.Option) (*pref.Options, error)
 	navFS() fs.FS
 	resFS() fs.FS
+	complete() bool
 }
 
 type fileSystems struct {
@@ -56,6 +57,10 @@ func (ex *primeExtent) options(settings ...pref.Option) (*pref.Options, error) {
 	return pref.Get(settings...)
 }
 
+func (ex *primeExtent) complete() bool {
+	return true
+}
+
 type resumeExtent struct {
 	baseExtent
 	w      *pref.Was
@@ -87,4 +92,11 @@ func (ex *resumeExtent) options(settings ...pref.Option) (*pref.Options, error) 
 	// filter.
 	//
 	return loaded.O, err
+}
+
+func (ex *resumeExtent) complete() bool {
+	// "NOT-IMPL: resumeExtent.complete -> the strategy knows this"
+	// ===> send to plugin?
+	//
+	return true
 }

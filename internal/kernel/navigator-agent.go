@@ -46,9 +46,7 @@ func top(ctx context.Context,
 		},
 	)
 
-	return &types.KernelResult{
-		Err: err,
-	}, nil
+	return ns.mediator.impl.Result(ctx, err), err
 }
 
 const (

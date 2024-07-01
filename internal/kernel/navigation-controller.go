@@ -8,15 +8,23 @@ import (
 )
 
 type NavigationController struct {
-	mediator *mediator
+	Mediator *mediator
+}
+
+func (nc *NavigationController) Result(ctx context.Context, err error) *types.KernelResult {
+	return nc.Mediator.impl.Result(ctx, err)
+}
+
+func (nc *NavigationController) Starting(session types.Session) {
+	nc.Mediator.Starting(session)
 }
 
 func (nc *NavigationController) Navigate(ctx context.Context) (core.TraverseResult, error) {
-	return nc.mediator.Navigate(ctx)
+	return nc.Mediator.Navigate(ctx)
 }
 
 func (nc *NavigationController) Impl() NavigatorImpl {
-	return nc.mediator.impl
+	return nc.Mediator.impl
 }
 
 func (nc *NavigationController) Register(types.Plugin) error {

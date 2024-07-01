@@ -3,7 +3,6 @@ package resume
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/snivilised/traverse/core"
 	"github.com/snivilised/traverse/enums"
 	"github.com/snivilised/traverse/i18n"
@@ -13,10 +12,18 @@ import (
 )
 
 type Controller struct {
-	controller core.Navigator
+	kc         types.KernelController
 	was        *pref.Was
 	strategy   resumeStrategy
 	facilities types.Facilities
+}
+
+func (c *Controller) Starting(session types.Session) {
+	c.kc.Starting(session)
+}
+
+func (c *Controller) Result(ctx context.Context, err error) *types.KernelResult {
+	return c.kc.Result(ctx, err)
 }
 
 func NewController(was *pref.Was, artefacts *kernel.Artefacts) *kernel.Artefacts {
@@ -29,13 +36,13 @@ func NewController(was *pref.Was, artefacts *kernel.Artefacts) *kernel.Artefacts
 		err      error
 	)
 
-	if strategy, err = newStrategy(was, artefacts.Navigator); err != nil {
+	if strategy, err = newStrategy(was, artefacts.Controller); err != nil {
 		return artefacts
 	}
 
 	return &kernel.Artefacts{
-		Navigator: &Controller{
-			controller: artefacts.Navigator,
+		Controller: &Controller{
+			kc:         artefacts.Controller,
 			was:        was,
 			strategy:   strategy,
 			facilities: artefacts.Facilities,
@@ -44,8 +51,8 @@ func NewController(was *pref.Was, artefacts *kernel.Artefacts) *kernel.Artefacts
 	}
 }
 
-func newStrategy(was *pref.Was, nav core.Navigator) (strategy resumeStrategy, err error) {
-	driver, ok := nav.(kernel.NavigatorDriver)
+func newStrategy(was *pref.Was, kc types.KernelController) (strategy resumeStrategy, err error) {
+	driver, ok := kc.(kernel.NavigatorDriver)
 
 	if !ok {
 		return nil, i18n.ErrInternalFailedToGetNavigatorDriver
@@ -53,7 +60,7 @@ func newStrategy(was *pref.Was, nav core.Navigator) (strategy resumeStrategy, er
 
 	base := baseStrategy{
 		o:    was.O,
-		nav:  nav,
+		kc:   kc,
 		impl: driver.Impl(),
 	}
 
@@ -72,8 +79,6 @@ func newStrategy(was *pref.Was, nav core.Navigator) (strategy resumeStrategy, er
 	return strategy, nil
 }
 
-func (c *Controller) Navigate(_ context.Context) (core.TraverseResult, error) {
-	return &types.KernelResult{
-		Err: errors.Wrap(core.ErrNotImpl, "resume.Controller.Navigate"),
-	}, nil
+func (c *Controller) Navigate(ctx context.Context) (core.TraverseResult, error) {
+	return c.strategy.resume(ctx)
 }

@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"io/fs"
+	"time"
 
 	"github.com/snivilised/traverse/core"
 	"github.com/snivilised/traverse/enums"
@@ -13,6 +14,18 @@ import (
 // package types defines internal types
 
 type (
+	Completion interface {
+		IsComplete() bool
+	}
+
+	// Session represents a traversal session and keeps tracks of
+	// timing.
+	Session interface {
+		Completion
+		StartedAt() time.Time
+		Elapsed() time.Duration
+	}
+
 	// Link represents a single decorator in the chain
 	Link interface {
 		// Next invokes this decorator which returns true if
@@ -76,21 +89,29 @@ type (
 		Metrics() *measure.Supervisor
 	}
 
-	// TraverseController
-	TraverseController interface {
+	// KernelController
+	KernelController interface {
 		core.Navigator
+		Starting(Session)
+		Result(ctx context.Context, err error) *KernelResult
 	}
 )
 
 type KernelResult struct {
+	Session  Session
 	Reporter measure.Reporter
 	Err      error
+	Complete bool
 }
 
-func (r KernelResult) Metrics() measure.Reporter {
+func (r *KernelResult) IsComplete() bool {
+	return r.Complete
+}
+
+func (r *KernelResult) Metrics() measure.Reporter {
 	return r.Reporter
 }
 
-func (r KernelResult) Error() error {
+func (r *KernelResult) Error() error {
 	return r.Err
 }
