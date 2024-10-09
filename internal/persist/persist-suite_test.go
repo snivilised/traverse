@@ -3,7 +3,6 @@ package persist_test
 import (
 	_ "embed"
 	"fmt"
-	"io/fs"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:revive // ok
@@ -30,14 +29,6 @@ const (
 )
 
 var (
-	perms = struct {
-		File fs.FileMode
-		Dir  fs.FileMode
-	}{
-		File: 0o666,
-		Dir:  0o777,
-	}
-
 	//go:embed data/test-restore.DEFAULT.json
 	content []byte
 )

@@ -1,6 +1,7 @@
 package lfs
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -34,6 +35,10 @@ import (
 // filepath.Separator with a virtual file system is not valid.
 //
 
+func sanitise(root string) string {
+	return root
+}
+
 // 🧩 ---> open
 
 // 🎯 openFS
@@ -50,28 +55,28 @@ func (f *openFS) Open(name string) (fs.File, error) {
 
 // 🎯 statFS
 type statFS struct {
-	openFS
+	*openFS
 }
 
 func NewStatFS(root string) fs.StatFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 	return &ents.stat
 }
 
 func (f *statFS) Stat(name string) (fs.FileInfo, error) {
-	return fs.Stat(f.fsys, name)
+	return os.Stat(filepath.Join(f.root, name))
 }
 
 // 🧩 ---> file system query
 
 // 🎯 readDirFS
 type readDirFS struct {
-	openFS
+	*openFS
 }
 
 // NewReadDirFS creates a native file system.
 func NewReadDirFS(root string) fs.ReadDirFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 
 	return &ents.exists
 }
@@ -101,12 +106,12 @@ func (n *readDirFS) ReadDir(name string) ([]fs.DirEntry, error) {
 
 // 🎯 queryStatusFS
 type queryStatusFS struct {
-	statFS
-	readDirFS
+	*statFS
+	*readDirFS
 }
 
 func NewQueryStatusFS(root string) fs.StatFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 
 	return &ents.exists
 }
@@ -115,8 +120,8 @@ func NewQueryStatusFS(root string) fs.StatFS {
 // method to determine the existence of a path.
 func QueryStatusFromFS(fsys fs.FS) fs.StatFS {
 	return &queryStatusFS{
-		readDirFS: readDirFS{
-			openFS: openFS{
+		readDirFS: &readDirFS{
+			openFS: &openFS{
 				fsys: fsys,
 			},
 		},
@@ -135,12 +140,12 @@ func (q *queryStatusFS) Stat(name string) (fs.FileInfo, error) {
 
 // 🎯 existsInFS
 type existsInFS struct {
-	queryStatusFS
+	*queryStatusFS
 }
 
 // ExistsInFS
 func NewExistsInFS(root string) ExistsInFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 
 	return &ents.exists
 }
@@ -175,11 +180,11 @@ func (f *existsInFS) DirectoryExists(name string) bool {
 
 // 🎯 readFileFS
 type readFileFS struct {
-	queryStatusFS
+	*queryStatusFS
 }
 
 func NewReadFileFS(root string) ReadFileFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 
 	return &ents.reader
 }
@@ -198,42 +203,125 @@ func (f *readFileFS) ReadFile(name string) ([]byte, error) {
 
 // 🧩 ---> file system mutation
 
+// 🎯 TODO:copyFS
+
+type copyFS struct {
+	*openFS
+}
+
+func (f *copyFS) Copy(from, to string) error {
+	return fmt.Errorf("copy not implemented yet (from: %q, to: %q)", from, to)
+}
+
+// CopyFS copies the file system fsys into the directory dir,
+// creating dir if necessary.
+func (f *copyFS) CopyFS(dir string, fsys fs.FS) error {
+	_ = fsys
+	return fmt.Errorf("copyFS not implemented yet (dir: %q)", dir)
+}
+
 // 🎯 baseWriterFS
 type baseWriterFS struct {
-	openFS
+	*openFS
 	overwrite bool
 }
 
-// 🎯 MkDirAllFS
-type mkDirAllFS struct {
-	existsInFS
+// 🎯 MakeDirFS
+type makeDirAllFS struct {
+	*existsInFS
 }
 
-// NewMkDirAllFS
-func NewMkDirAllFS() MkDirAllFS {
-	panic("NOT-IMPL: NewMkDirAllFS")
+// NewMakeDirFS
+func NewMakeDirFS(root string, overwrite bool) MakeDirFS {
+	ents := compose(sanitise(root)).mutator(overwrite)
+
+	return &ents.writer
 }
 
-// MkdirAll creates a directory named path,
+// Mkdir creates a new directory with the specified name and permission
+// bits (before umask).
+// If there is an error, it will be of type *PathError.
+func (f *makeDirAllFS) MakeDir(name string, perm os.FileMode) error {
+	if !fs.ValidPath(name) {
+		return locale.NewInvalidPathError(name)
+	}
+
+	if f.DirectoryExists(name) {
+		return nil
+	}
+
+	path := filepath.Join(f.statFS.root, name)
+	return os.Mkdir(path, perm)
+}
+
+// MakeDirAll creates a directory named path,
 // along with any necessary parents, and returns nil,
 // or else returns an error.
 // The permission bits perm (before umask) are used for all
 // directories that MkdirAll creates.
-// If path is already a directory, MkdirAll does nothing
+// If path is already a directory, MakeDirAll does nothing
 // and returns nil.
-func (f *mkDirAllFS) MkDirAll(name string, perm os.FileMode) error {
-	// TODO: check path is valid using fs.ValidPath
-	//
-	return os.MkdirAll(name, perm)
+func (f *makeDirAllFS) MakeDirAll(name string, perm os.FileMode) error {
+	if !fs.ValidPath(name) {
+		return locale.NewInvalidPathError(name)
+	}
+
+	if f.DirectoryExists(name) {
+		return nil
+	}
+	path := filepath.Join(f.statFS.root, name)
+	return os.MkdirAll(path, perm)
+}
+
+// 🎯 moveFS
+
+type moveFS struct {
+	*openFS
+}
+
+func (f *moveFS) Move(from, to string) error {
+	return fmt.Errorf("move not implemented yet (from: %q, to: %q)", from, to)
+}
+
+// 🎯 removeFS
+
+type removeFS struct {
+	*openFS
+}
+
+func (f *removeFS) Remove(name string) error {
+	if !fs.ValidPath(name) {
+		return locale.NewInvalidPathError(name)
+	}
+
+	return os.Remove(filepath.Clean(name))
+}
+
+func (f *removeFS) RemoveAll(path string) error {
+	if !fs.ValidPath(path) {
+		return locale.NewInvalidPathError(path)
+	}
+
+	return fmt.Errorf("path not implemented yet (name: %q)", path)
+}
+
+// 🎯 renameFS
+
+type renameFS struct {
+	*openFS
+}
+
+func (s *renameFS) Rename(from, to string) error {
+	return fmt.Errorf("rename not implemented yet (from: %q, to: %q)", from, to)
 }
 
 // 🎯 writeFileFS
 type writeFileFS struct {
-	baseWriterFS
+	*baseWriterFS
 }
 
 func NewWriteFileFS(root string, overwrite bool) WriteFileFS {
-	ents := compose(root).attach(overwrite)
+	ents := compose(sanitise(root)).mutator(overwrite)
 
 	return &ents.writer
 }
@@ -279,43 +367,56 @@ func (f *writeFileFS) WriteFile(name string, data []byte, perm os.FileMode) erro
 
 // 🎯 readerFS
 type readerFS struct {
-	readDirFS
-	readFileFS
-	existsInFS
-	statFS
+	*existsInFS
+	*readDirFS
+	*readFileFS
+	*statFS
 }
 
 // NewReaderFS
 func NewReaderFS(root string) ReaderFS {
-	ents := compose(root)
+	ents := compose(sanitise(root))
 
 	return &ents.reader
 }
 
 // 🎯 writerFS
 type writerFS struct {
-	mkDirAllFS
-	writeFileFS
+	*copyFS
+	*makeDirAllFS
+	*moveFS
+	*removeFS
+	*renameFS
+	*writeFileFS
 }
 
 func NewWriterFS(root string, overwrite bool) WriterFS {
-	ents := compose(root).attach(overwrite)
+	ents := compose(sanitise(root)).mutator(overwrite)
 
 	return &ents.writer
 }
 
-// 🎯 traverseFS
-type traverseFS struct {
-	readerFS
-	writerFS
+// 🎯 mutatorFS
+type mutatorFS struct {
+	*readerFS
+	*writerFS
 }
 
 func NewTraverseFS(root string, overwrite bool) TraverseFS {
-	ents := compose(root).attach(overwrite)
+	ents := compose(sanitise(root)).mutator(overwrite)
 
-	return &traverseFS{
-		readerFS: ents.reader,
-		writerFS: ents.writer,
+	return &mutatorFS{
+		readerFS: &ents.reader,
+		writerFS: &ents.writer,
+	}
+}
+
+func NewUniversalFS(root string, overwrite bool) UniversalFS {
+	ents := compose(sanitise(root)).mutator(overwrite)
+
+	return &mutatorFS{
+		readerFS: &ents.reader,
+		writerFS: &ents.writer,
 	}
 }
 
@@ -329,18 +430,28 @@ type (
 		query  queryStatusFS
 		exists existsInFS
 		reader readerFS
+		copy   copyFS
+		move   moveFS
+		remove removeFS
+		rename renameFS
 		writer writerFS
 	}
 )
 
-func (e *entities) attach(overwrite bool) *entities {
+func (e *entities) mutator(overwrite bool) *entities {
 	e.writer = writerFS{
-		mkDirAllFS: mkDirAllFS{
-			existsInFS: e.exists,
+		copyFS: &copyFS{
+			openFS: &e.open,
 		},
-		writeFileFS: writeFileFS{
-			baseWriterFS: baseWriterFS{
-				openFS:    e.open,
+		makeDirAllFS: &makeDirAllFS{
+			existsInFS: &e.exists,
+		},
+		moveFS:   &e.move,
+		removeFS: &e.remove,
+		renameFS: &e.rename,
+		writeFileFS: &writeFileFS{
+			baseWriterFS: &baseWriterFS{
+				openFS:    &e.open,
 				overwrite: overwrite,
 			},
 		},
@@ -355,28 +466,28 @@ func compose(root string) *entities {
 		root: root,
 	}
 	read := readDirFS{
-		openFS: open,
+		openFS: &open,
 	}
 	stat := statFS{
-		openFS: open,
+		openFS: &open,
 	}
 	query := queryStatusFS{
-		statFS: statFS{
-			openFS: open,
+		statFS: &statFS{
+			openFS: &open,
 		},
-		readDirFS: read,
+		readDirFS: &read,
 	}
 	exists := existsInFS{
-		queryStatusFS: query,
+		queryStatusFS: &query,
 	}
 
 	reader := readerFS{
-		readDirFS: read,
-		readFileFS: readFileFS{
-			queryStatusFS: query,
+		readDirFS: &read,
+		readFileFS: &readFileFS{
+			queryStatusFS: &query,
 		},
-		existsInFS: exists,
-		statFS:     stat,
+		existsInFS: &exists,
+		statFS:     &stat,
 	}
 
 	return &entities{

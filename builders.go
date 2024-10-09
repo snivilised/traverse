@@ -21,19 +21,19 @@ type buildArtefacts struct {
 // for Walk and one for Run. The Prime/Resume extents create the Builders
 // instance.
 type Builders struct {
-	using       *pref.Using
-	universalFS pref.TraverseFileSystemBuilder
-	options     optionsBuilder
-	navigator   kernel.NavigatorBuilder
-	plugins     pluginsBuilder
-	extent      extentBuilder
+	using      *pref.Using
+	traverseFS pref.TraverseFileSystemBuilder
+	options    optionsBuilder
+	navigator  kernel.NavigatorBuilder
+	plugins    pluginsBuilder
+	extent     extentBuilder
 }
 
 func (bs *Builders) buildAll() (*buildArtefacts, error) {
 	// BUILD FILE SYSTEM & EXTENT
 	//
 	ext := bs.extent.build(
-		bs.universalFS.Build(bs.using.Root),
+		bs.traverseFS.Build(bs.using.Root),
 	)
 
 	// BUILD OPTIONS

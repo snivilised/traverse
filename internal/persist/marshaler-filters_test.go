@@ -172,9 +172,9 @@ var _ = Describe("Marshaler", Ordered, func() {
 			},
 		}
 
-		Expect(FS.MkDirAll(destination, perms.Dir|os.ModeDir)).To(Succeed())
-		Expect(FS.MkDirAll(source, perms.Dir|os.ModeDir)).To(Succeed())
-		Expect(FS.WriteFile(readPath, content, perms.File)).To(Succeed())
+		Expect(FS.MakeDirAll(destination, lab.Perms.Dir|os.ModeDir)).To(Succeed())
+		Expect(FS.MakeDirAll(source, lab.Perms.Dir|os.ModeDir)).To(Succeed())
+		Expect(FS.WriteFile(readPath, content, lab.Perms.File)).To(Succeed())
 
 		// 🍑 NODE:
 		//

@@ -57,7 +57,7 @@ func marshal(entry *marshalTE, tfs lfs.TraverseFS) *tampered {
 			Depth:       3,
 		},
 		Path: writePath,
-		Perm: perms.File,
+		Perm: lab.Perms.File,
 		FS:   tfs,
 	}
 	result, err := persist.Marshal(request)
@@ -149,9 +149,9 @@ var _ = Describe("Marshaler", Ordered, func() {
 			},
 		}
 
-		Expect(FS.MkDirAll(destination, perms.Dir|os.ModeDir)).To(Succeed())
-		Expect(FS.MkDirAll(source, perms.Dir|os.ModeDir)).To(Succeed())
-		Expect(FS.WriteFile(readPath, content, perms.File)).To(Succeed())
+		Expect(FS.MakeDirAll(destination, lab.Perms.Dir|os.ModeDir)).To(Succeed())
+		Expect(FS.MakeDirAll(source, lab.Perms.Dir|os.ModeDir)).To(Succeed())
+		Expect(FS.WriteFile(readPath, content, lab.Perms.File)).To(Succeed())
 
 		sourceNodeFilterDef = &core.FilterDef{
 			Type:            enums.FilterTypeGlob,

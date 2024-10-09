@@ -44,23 +44,36 @@ type (
 		ReadFileFS
 	}
 
-	// MkDirAllFS is a file system with a MkDirAll method.
-	MkDirAllFS interface {
+	// MakeDirFS is a file system with a MkDirAll method.
+	MakeDirFS interface {
 		ExistsInFS
-		MkDirAll(name string, perm os.FileMode) error
+		MakeDir(name string, perm os.FileMode) error
+		MakeDirAll(name string, perm os.FileMode) error
 	}
 
 	// CopyFS
-	CopyFS interface{}
+	CopyFS interface {
+		Copy(from, to string) error
+		// CopyFS copies the file system fsys into the directory dir,
+		// creating dir if necessary.
+		CopyFS(dir string, fsys fs.FS) error
+	}
 
 	// MoveFS
-	MoveFS interface{}
+	MoveFS interface {
+		Move(from, to string) error
+	}
 
 	// RemoveFS
-	RemoveFS interface{}
+	RemoveFS interface {
+		Remove(name string) error
+		RemoveAll(path string) error
+	}
 
 	// RenameFS
-	RenameFS interface{}
+	RenameFS interface {
+		Rename(from, to string) error
+	}
 
 	// WriteFileFS file system non streaming writer
 	WriteFileFS interface {
@@ -83,14 +96,17 @@ type (
 	// TraverseFS non streaming file system with reader and some
 	// writer capabilities
 	TraverseFS interface {
-		MkDirAllFS
+		MakeDirFS
 		ReaderFS
 		WriteFileFS
 	}
 
 	// UniversalFS the file system that can do it all
 	UniversalFS interface {
-		ReaderFS
-		WriterFS
+		CopyFS
+		MoveFS
+		RemoveFS
+		RenameFS
+		TraverseFS
 	}
 )

@@ -34,10 +34,6 @@ type (
 	}
 )
 
-const (
-	permFile = 0o666
-)
-
 var (
 	fakeHome      = filepath.Join(string(filepath.Separator), "home", "rabbitweed")
 	fakeAbsCwd    = filepath.Join(string(filepath.Separator), "home", "rabbitweed", "music", "xpander")
@@ -61,12 +57,12 @@ func fakeAbsResolver(path string) (string, error) {
 }
 
 type (
-	mkDirAllMapFS struct {
+	makeDirMapFS struct {
 		mapFS fstest.MapFS
 	}
 )
 
-func (f *mkDirAllMapFS) FileExists(path string) bool {
+func (f *makeDirMapFS) FileExists(path string) bool {
 	fi, err := f.mapFS.Stat(path)
 	if err != nil {
 		return false
@@ -79,7 +75,7 @@ func (f *mkDirAllMapFS) FileExists(path string) bool {
 	return true
 }
 
-func (f *mkDirAllMapFS) DirectoryExists(path string) bool {
+func (f *makeDirMapFS) DirectoryExists(path string) bool {
 	if strings.HasPrefix(path, string(filepath.Separator)) {
 		path = path[1:]
 	}
@@ -96,7 +92,17 @@ func (f *mkDirAllMapFS) DirectoryExists(path string) bool {
 	return true
 }
 
-func (f *mkDirAllMapFS) MkDirAll(path string, perm os.FileMode) error {
+func (f *makeDirMapFS) MakeDir(path string, perm os.FileMode) error {
+	if exists := f.DirectoryExists(path); !exists {
+		f.mapFS[path] = &fstest.MapFile{
+			Mode: fs.ModeDir | perm,
+		}
+	}
+
+	return nil
+}
+
+func (f *makeDirMapFS) MakeDirAll(path string, perm os.FileMode) error {
 	var current string
 	segments := filepath.SplitList(path)
 

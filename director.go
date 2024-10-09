@@ -78,7 +78,7 @@ func features(o *pref.Options, using *pref.Using, mediator types.Mediator,
 func Prime(using *pref.Using, settings ...pref.Option) *Builders {
 	return &Builders{
 		using: using,
-		universalFS: pref.CreateTraverseFS(func(root string) lfs.TraverseFS {
+		traverseFS: pref.CreateTraverseFS(func(root string) lfs.TraverseFS {
 			if using.GetTraverseFS != nil {
 				return using.GetTraverseFS(root)
 			}
@@ -126,7 +126,7 @@ func Prime(using *pref.Using, settings ...pref.Option) *Builders {
 func Resume(was *Was, settings ...pref.Option) *Builders {
 	return &Builders{
 		using: &was.Using,
-		universalFS: pref.CreateTraverseFS(func(root string) lfs.TraverseFS {
+		traverseFS: pref.CreateTraverseFS(func(root string) lfs.TraverseFS {
 			if was.Using.GetTraverseFS != nil {
 				return was.Using.GetTraverseFS(root)
 			}

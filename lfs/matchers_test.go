@@ -21,9 +21,9 @@ func ExistInFS(fs interface{}) types.GomegaMatcher {
 }
 
 func (m *PathExistsMatcher) Match(actual interface{}) (bool, error) {
-	FS, fileSystemOK := m.FS.(lfs.MkDirAllFS)
+	FS, fileSystemOK := m.FS.(lfs.ExistsInFS)
 	if !fileSystemOK {
-		return false, fmt.Errorf("❌ matcher expected a VirtualFS instance (%T)", FS)
+		return false, fmt.Errorf("❌ matcher expected an lfs.ExistsInFS instance (%T)", FS)
 	}
 
 	if actualPath, dirOK := actual.(AsDirectory); dirOK {

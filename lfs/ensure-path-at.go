@@ -23,7 +23,7 @@ import (
 // system.
 
 func EnsurePathAt(path, defaultFilename string, perm os.FileMode,
-	vfs ...MkDirAllFS,
+	vfs ...MakeDirFS,
 ) (at string, err error) {
 	var (
 		directory, file string
@@ -38,7 +38,7 @@ func EnsurePathAt(path, defaultFilename string, perm os.FileMode,
 
 	if len(vfs) > 0 {
 		if !vfs[0].DirectoryExists(directory) {
-			err = vfs[0].MkDirAll(directory, perm)
+			err = vfs[0].MakeDirAll(directory, perm)
 		}
 	} else {
 		err = os.MkdirAll(directory, perm)

@@ -64,7 +64,7 @@ tasks:
     cmds:
       - go test ./cycle
 
-  tfs:
+  lfs:
     cmds:
       - go test ./lfs
 
