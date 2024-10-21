@@ -28,8 +28,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
-github.com/snivilised/li18ngo v0.1.4 h1:y6EECoVFpmkud2yDEeBnMnebPmSvdrEZ/LAq1PoPctE=
-github.com/snivilised/li18ngo v0.1.4/go.mod h1:Or3qUhpR6AM1X51i82RtyCvORWy2/hrxY9lg1i1gFTE=
+github.com/snivilised/li18ngo v0.1.5 h1:YJJ21FTyORHuR8P7bWfKUOa9+hOEDyBa1qaY8sHoAB0=
+github.com/snivilised/li18ngo v0.1.5/go.mod h1:+3P8NGIGXNaKFHSwP54q2UawhfUEqPfqPXPiB0pBihg=
 github.com/snivilised/nefilim v0.1.1 h1:uMhLSfj5prGr2bahwzSM50rpd22fiiv0ZDLSzxYWsgg=
 github.com/snivilised/nefilim v0.1.1/go.mod h1:+4/hKxgfvE8eNjLMJC+3ropEZSQuiR/NqfPtIuw7ZMw=
 github.com/snivilised/pants v0.1.2 h1:6Abj02gV5rFYyKfCsmeEiOi1pLdRyITKUY5oDoRgYuU=
